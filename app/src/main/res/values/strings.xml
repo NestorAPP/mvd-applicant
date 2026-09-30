@@ -5,4 +5,18 @@
     <string name="tab_technique">Техника</string>
     <string name="tab_video">Видео</string>
     <string name="tab_training">Подготовка</string>
+
+    <string name="calculator_title">Вступительные испытания</string>
+    <string name="gender_male">Юноша</string>
+    <string name="gender_female">Девушка</string>
+    <string name="group_1_2">1-2 группа</string>
+    <string name="group_3_4">3-4 группа</string>
+    <string name="label_pullups">Подтягивание (раз)</string>
+    <string name="label_sku">СКУ (раз)</string>
+    <string name="label_run100">Бег 100 м (сек)</string>
+    <string name="label_run1000_min">1000 м — мин</string>
+    <string name="label_run1000_sec">1000 м — сек</string>
+    <string name="button_calculate">Рассчитать</string>
+    <string name="result_total">Итог</string>
+    <string name="warning_not_passed">Норматив не сдан. Минимальный балл за каждое упражнение — 1</string>
 </resources>
