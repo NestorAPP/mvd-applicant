@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Абитуриент МВД</string>
+
+    <string name="tab_calculator">Калькулятор</string>
+    <string name="tab_technique">Техника</string>
+    <string name="tab_video">Видео</string>
+    <string name="tab_training">Подготовка</string>
+</resources>
