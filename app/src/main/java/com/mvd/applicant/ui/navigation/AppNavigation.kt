@@ -1,5 +1,7 @@
 package com.mvd.applicant.ui.navigation
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -18,6 +20,7 @@ import com.mvd.applicant.ui.calculator.CalculatorScreen
 import com.mvd.applicant.ui.technique.TechniqueScreen
 import com.mvd.applicant.ui.training.TrainingInputScreen
 import com.mvd.applicant.ui.video.VideoScreen
+import com.mvd.applicant.ui.widgets.TricolorStripe
 
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     data object Calculator : Screen("calculator", "Калькулятор", Icons.Default.Calculate)
@@ -60,15 +63,20 @@ fun AppNavigation() {
             }
         }
     ) { padding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Calculator.route,
-            modifier = Modifier.padding(padding)
-        ) {
-            composable(Screen.Calculator.route) { CalculatorScreen() }
-            composable(Screen.Technique.route) { TechniqueScreen() }
-            composable(Screen.Video.route) { VideoScreen() }
-            composable(Screen.Training.route) { TrainingInputScreen() }
+        Column(modifier = Modifier.fillMaxSize()) {
+            TricolorStripe()
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Calculator.route,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(padding)
+            ) {
+                composable(Screen.Calculator.route) { CalculatorScreen() }
+                composable(Screen.Technique.route) { TechniqueScreen() }
+                composable(Screen.Video.route) { VideoScreen() }
+                composable(Screen.Training.route) { TrainingInputScreen() }
+            }
         }
     }
 }
