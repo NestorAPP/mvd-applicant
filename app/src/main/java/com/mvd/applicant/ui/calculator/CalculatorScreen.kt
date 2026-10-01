@@ -6,26 +6,48 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mvd.applicant.data.model.Gender
 import com.mvd.applicant.data.model.PurposeGroup
 import com.mvd.applicant.ui.theme.MvdBlue
 import com.mvd.applicant.ui.theme.MvdRed
+import com.mvd.applicant.ui.widgets.WheelPicker
+import kotlin.math.abs
 
 @Composable
 fun CalculatorScreen(vm: CalculatorViewModel = viewModel()) {
     val state by vm.state.collectAsState()
+
+    val strengthValues = remember(state.gender) {
+        if (state.gender == Gender.MALE) (0..50).toList() else (0..60).toList()
+    }
+    val strengthLabels = remember(strengthValues) { strengthValues.map { it.toString() } }
+    val strengthIndex = strengthValues.indexOf(state.strengthValue).coerceAtLeast(0)
+
+    val run100Values = remember { (100..250).map { it / 10.0 } }
+    val run100Labels = remember { run100Values.map { "%.1f".format(it) } }
+    val run100Index = run100Values
+        .indexOfFirst { abs(it - state.run100Seconds) < 0.001 }
+        .coerceAtLeast(0)
+
+    val run1000MinValues = remember { (2..8).toList() }
+    val run1000MinLabels = remember { run1000MinValues.map { it.toString() } }
+    val run1000MinIndex = run1000MinValues.indexOf(state.run1000Minutes).coerceAtLeast(0)
+
+    val run1000SecValues = remember { (0..59).toList() }
+    val run1000SecLabels = remember { run1000SecValues.map { "%02d".format(it) } }
+    val run1000SecIndex = run1000SecValues.indexOf(state.run1000Seconds).coerceAtLeast(0)
 
     Column(
         modifier = Modifier
@@ -68,44 +90,60 @@ fun CalculatorScreen(vm: CalculatorViewModel = viewModel()) {
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outline)
 
-        val strengthLabel = if (state.gender == Gender.MALE) "Подтягивание (раз)" else "СКУ (раз)"
-        OutlinedTextField(
-            value = state.strengthInput,
-            onValueChange = vm::setStrength,
-            label = { Text(strengthLabel) },
-            isError = state.strengthError != null,
-            supportingText = { state.strengthError?.let { Text(it, color = MvdRed) } },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                val title = if (state.gender == Gender.MALE)
+                    "Сила: Подтягивание (раз)"
+                else "Сила: СКУ (раз)"
+                Text(title, style = MaterialTheme.typography.titleLarge, color = MvdBlue)
+                Spacer(Modifier.height(8.dp))
+                key(state.gender) {
+                    WheelPicker(
+                        items = strengthLabels,
+                        selectedIndex = strengthIndex,
+                        onSelectedIndexChange = { vm.setStrength(strengthValues[it]) }
+                    )
+                }
+            }
+        }
 
-        OutlinedTextField(
-            value = state.run100Input,
-            onValueChange = vm::setRun100,
-            label = { Text("Бег 100 м (сек)") },
-            isError = state.run100Error != null,
-            supportingText = { state.run100Error?.let { Text(it, color = MvdRed) } },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Скорость: Бег 100 м (сек)",
+                    style = MaterialTheme.typography.titleLarge, color = MvdBlue)
+                Spacer(Modifier.height(8.dp))
+                WheelPicker(
+                    items = run100Labels,
+                    selectedIndex = run100Index,
+                    onSelectedIndexChange = { vm.setRun100(run100Values[it]) }
+                )
+            }
+        }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = state.run1000MinInput,
-                onValueChange = vm::setRun1000Min,
-                label = { Text("1000 м — мин") },
-                isError = state.run1000Error != null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
-            )
-            OutlinedTextField(
-                value = state.run1000SecInput,
-                onValueChange = vm::setRun1000Sec,
-                label = { Text("1000 м — сек") },
-                isError = state.run1000Error != null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
-            )
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Выносливость: Бег 1000 м",
+                    style = MaterialTheme.typography.titleLarge, color = MvdBlue)
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    WheelPicker(
+                        items = run1000MinLabels,
+                        selectedIndex = run1000MinIndex,
+                        onSelectedIndexChange = { vm.setRun1000Minutes(run1000MinValues[it]) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(":", style = MaterialTheme.typography.headlineMedium, color = MvdBlue)
+                    WheelPicker(
+                        items = run1000SecLabels,
+                        selectedIndex = run1000SecIndex,
+                        onSelectedIndexChange = { vm.setRun1000Seconds(run1000SecValues[it]) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
 
         Button(
@@ -169,7 +207,8 @@ private fun ResultCard(title: String, value: String, points: Int) {
         ) {
             Column {
                 Text(title, style = MaterialTheme.typography.bodyLarge)
-                Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(value, style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Text("$points", style = MaterialTheme.typography.headlineMedium, color = MvdBlue)
         }
